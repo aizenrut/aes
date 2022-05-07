@@ -49,9 +49,7 @@ impl Config {
         if bytes_chave.len() != 16 {
             return Err("A chave deve ter exatamente 16 bytes");
         }
-
-        println!("b {:?}", bytes_chave);
-
+        
         let mut matriz_chave: [[u8; 4]; 4] = [[0; 4]; 4];
 
         for i in 0..4 {
