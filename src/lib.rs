@@ -142,11 +142,11 @@ impl RoundKey {
         self.chave
     }
 
-    fn sub_word(palavra: [u8; 4]) -> [u8; 4] {
+    fn sub_word(word: [u8; 4]) -> [u8; 4] {
         let mut sub_word = [0; 4];
 
         for i in 0..4 {
-            let hex = format!("{:01$x}", palavra[i], 2);
+            let hex = format!("{:01$x}", word[i], 2);
             let mut chars = hex.chars();
 
             let linha = usize::from_str_radix(&chars.next().unwrap().to_string(), 16).unwrap();
@@ -246,5 +246,135 @@ mod testes {
 
         let args = vec![String::new(), arquivo_origem.clone(), arquivo_destino.clone(), chave.clone()];
         Config::new(args).unwrap();
+    }
+
+    #[test]
+    fn round_key_new_passando_chave() {
+        let chave = [[1, 5, 9, 13],
+                     [2, 6, 10, 14],
+                     [3, 7, 11, 15],
+                     [4, 8, 12, 16]];
+        
+        let round_key = RoundKey::new(chave); 
+
+        assert_eq!(chave, round_key.get_chave());
+    }
+
+    #[test]
+    fn round_key_from_anterior() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+        
+        let anterior = RoundKey::new(chave);
+        let nova = RoundKey::from(&anterior, 1);
+
+        let nova_chave = [[111, 42, 99, 46],
+                          [198, 128, 202, 132],
+                          [16, 87, 28, 83],
+                          [167, 239, 163, 243]];
+
+        assert_eq!(nova_chave, nova.get_chave());
+    }
+
+    #[test]
+    fn sub_word_inicio_sbox() {
+        let word = [0, 1, 2, 3];
+
+        let sub = RoundKey::sub_word(word);
+
+        assert_eq!([99, 124, 119, 123], sub);
+    }
+
+    #[test]
+    fn get_round_constant_todas_round_keys() {
+        assert_eq!(Ok([0, 0, 0, 0]), RoundKey::get_round_constant(0));
+        assert_eq!(Ok([1, 0, 0, 0]), RoundKey::get_round_constant(1));
+        assert_eq!(Ok([2, 0, 0, 0]), RoundKey::get_round_constant(2));
+        assert_eq!(Ok([4, 0, 0, 0]), RoundKey::get_round_constant(3));
+        assert_eq!(Ok([8, 0, 0, 0]), RoundKey::get_round_constant(4));
+        assert_eq!(Ok([16, 0, 0, 0]), RoundKey::get_round_constant(5));
+        assert_eq!(Ok([32, 0, 0, 0]), RoundKey::get_round_constant(6));
+        assert_eq!(Ok([64, 0, 0, 0]), RoundKey::get_round_constant(7));
+        assert_eq!(Ok([128, 0, 0, 0]), RoundKey::get_round_constant(8));
+        assert_eq!(Ok([27, 0, 0, 0]), RoundKey::get_round_constant(9));
+        assert_eq!(Ok([54, 0, 0, 0]), RoundKey::get_round_constant(10));
+    }
+
+    #[test]
+    #[should_panic(expected = "Round constant inexistente")]
+    fn get_round_constant_round_key_invalida() {
+        RoundKey::get_round_constant(11).unwrap();
+    }
+
+    #[test]
+    fn get_w_todas_words() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+
+        let round_key = RoundKey::new(chave);
+
+        assert_eq!(Ok([65, 66, 67, 68]), round_key.get_w(0));
+        assert_eq!(Ok([69, 70, 71, 72]), round_key.get_w(1));
+        assert_eq!(Ok([73, 74, 75, 76]), round_key.get_w(2));
+        assert_eq!(Ok([77, 78, 79, 80]), round_key.get_w(3));
+    }
+
+    #[test]
+    #[should_panic(expected = "Uma round key só possui 4 palavras")]
+    fn get_w_indice_invalido() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+
+        let round_key = RoundKey::new(chave);
+
+        round_key.get_w(4).unwrap();
+    }
+
+    #[test]
+    fn get_word_from_todas_words() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+
+        assert_eq!(Ok([65, 66, 67, 68]), RoundKey::get_word_from(chave, 0));
+        assert_eq!(Ok([69, 70, 71, 72]), RoundKey::get_word_from(chave, 1));
+        assert_eq!(Ok([73, 74, 75, 76]), RoundKey::get_word_from(chave, 2));
+        assert_eq!(Ok([77, 78, 79, 80]), RoundKey::get_word_from(chave, 3));
+    }
+
+    #[test]
+    #[should_panic(expected = "Uma round key só possui 4 palavras")]
+    fn get_word_from_indice_invalido() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+
+        RoundKey::get_word_from(chave, 4).unwrap();
+    }
+
+    #[test]
+    fn expansao_de_chave_expandir_validando_ultima_round_key() {
+        let chave = [[65, 69, 73, 77],
+                     [66, 70, 74, 78],
+                     [67, 71, 75, 79],
+                     [68, 72, 76, 80]];
+
+        let ultima = [[136, 191, 187, 157],
+                      [46, 107, 62, 233],
+                      [17, 151, 61, 183],
+                      [219, 8, 218, 239]];
+
+        let key_schedule = ExpansaoDeChave::expandir(chave);
+
+        assert_eq!(chave, key_schedule[0].get_chave());
+        assert_eq!(ultima, key_schedule[10].get_chave());
     }
 }

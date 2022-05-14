@@ -10,15 +10,4 @@ fn main() {
     });
 
     let key_schedule = ExpansaoDeChave::expandir(config.matriz_chave);
-
-    let mut counter = 0;
-
-    for k in key_schedule {
-        println!("{})", counter);
-        for l in k.get_chave() {
-            println!("{:?}", l);
-        }
-        counter += 1;
-        println!();
-    }
 }
