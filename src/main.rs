@@ -1,5 +1,5 @@
 use std::{env, process};
-use aes::{Config, ExpansaoDeChave};
+use aes::{Aes, Config, ExpansaoDeChave};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,5 +9,14 @@ fn main() {
         process::exit(1);
     });
 
-    let key_schedule = ExpansaoDeChave::expandir(config.matriz_chave);
+    let _key_schedule = ExpansaoDeChave::expandir(config.matriz_chave);
+
+    let blocos = Aes::get_state_matrix(String::from("DESENVOLVIMENTO!").as_str());
+
+    for b in blocos {
+        for l in b {
+            println!("{:?}", l);
+        }
+        println!();
+    }
 }

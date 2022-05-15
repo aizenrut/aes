@@ -194,6 +194,45 @@ impl RoundKey {
 
 // -- expansão de chave
 
+pub struct Aes {
+}
+
+impl Aes {
+    pub fn get_state_matrix(texto: &str) -> Vec<[[u8; 4]; 4]> {
+        let bytes = texto.as_bytes().to_vec();
+        
+        Aes::to_pkcs5_blocks(bytes)
+    }
+
+    fn to_pkcs5_blocks(bytes: Vec<u8>) -> Vec<[[u8; 4]; 4]> {
+        let mut blocos = vec![];
+        let qtd_ate_16 = 16 - bytes.len() % 16;
+        let bytes_totais = bytes.len() + qtd_ate_16;
+        let qtd_blocos = bytes_totais/16;
+
+        for i in 0..qtd_blocos {
+            let mut matriz_estado = [[0; 4]; 4];
+
+            for j in 0..4 {
+                for k in 0..4 {
+                    let byte_atual = i*16 + j*4 + k;
+
+                    if byte_atual >= bytes.len() {
+                        matriz_estado[k][j] = qtd_ate_16 as u8;    
+                    }
+                    else {
+                        matriz_estado[k][j] = bytes[byte_atual];
+                    }
+                }
+            }
+
+            blocos.push(matriz_estado);
+        }
+
+        blocos
+    }
+}
+
 #[cfg(test)]
 mod testes {
     use super::*;
