@@ -52,9 +52,7 @@ impl Config {
 
 // ++ expansão de chave
 
-pub struct ExpansaoDeChave {
-    //pub key_schedule: [RoundKey; 11]
-}
+pub struct ExpansaoDeChave;
 
 impl ExpansaoDeChave {
     pub fn expandir(chave: [[u8; 4]; 4]) -> Vec<RoundKey> {
