@@ -196,7 +196,16 @@ pub struct Aes {
 }
 
 impl Aes {
-    pub fn get_state_matrix(texto: &str) -> Vec<[[u8; 4]; 4]> {
+
+    pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> [[u8; 4]; 4] {
+        let matriz_estado = Aes::get_matriz_estado(texto);
+        let depois_xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
+
+
+        depois_xor
+    }
+
+    fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
         let bytes = texto.as_bytes().to_vec();
         
         Aes::to_pkcs5_blocks(bytes)
@@ -229,6 +238,18 @@ impl Aes {
 
         blocos
     }
+
+    fn xor(m1: [[u8; 4]; 4], m2: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
+        let mut xor = [[0; 4]; 4]; 
+
+        for i in 0..4 {
+            for j in 0..4 {
+                xor[i][j] = m1[i][j] ^ m2[i][j];
+            }
+        }
+
+        xor
+    } 
 }
 
 #[cfg(test)]

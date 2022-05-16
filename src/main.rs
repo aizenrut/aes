@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use aes::{Aes, Config, ExpansaoDeChave};
 
-
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -12,15 +11,12 @@ fn main() {
         process::exit(1);
     });
 
-    let _key_schedule = ExpansaoDeChave::expandir(config.matriz_chave);
+    let key_schedule = ExpansaoDeChave::expandir(config.matriz_chave);
 
-    let blocos = Aes::get_state_matrix(String::from("DESENVOLVIMENTO!").as_str());
+    let bloco = Aes::encrypt(String::from("DESENVOLVIMENTO!").as_str(), key_schedule);
 
-    for b in blocos {
-        for l in b {
-            println!("{:?}", l);
-        }
-        println!();
+    for l in bloco {
+        println!("{:?}", l);
     }
 }
 
