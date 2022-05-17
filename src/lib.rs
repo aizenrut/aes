@@ -200,9 +200,9 @@ impl Aes {
     pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> [[u8; 4]; 4] {
         let matriz_estado = Aes::get_matriz_estado(texto);
         let depois_xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
+        let sub_bytes = Aes::sub_bytes(depois_xor);
 
-
-        depois_xor
+        sub_bytes
     }
 
     fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
@@ -249,7 +249,25 @@ impl Aes {
         }
 
         xor
-    } 
+    }
+
+    fn sub_bytes(bloco: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
+        let mut sub_bytes = [[0; 4]; 4];
+
+        for i in 0..4 {
+            for j in 0..4 {
+                let hex = format!("{:01$x}", bloco[i][j], 2);
+                let mut chars = hex.chars();
+
+                let linha = usize::from_str_radix(&chars.next().unwrap().to_string(), 16).unwrap();
+                let coluna = usize::from_str_radix(&chars.next().unwrap().to_string(), 16).unwrap();
+
+                sub_bytes[i][j] = u8::from_str_radix(S_BOX[linha][coluna], 16).unwrap();
+            }
+        }
+
+        sub_bytes
+    }
 }
 
 #[cfg(test)]
