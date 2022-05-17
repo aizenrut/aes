@@ -201,8 +201,9 @@ impl Aes {
         let matriz_estado = Aes::get_matriz_estado(texto);
         let depois_xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
         let sub_bytes = Aes::sub_bytes(depois_xor);
+        let shift_rows = Aes::shift_rows(sub_bytes);
 
-        sub_bytes
+        shift_rows
     }
 
     fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
@@ -267,6 +268,14 @@ impl Aes {
         }
 
         sub_bytes
+    }
+
+    fn shift_rows(mut bloco: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
+        for i in 1..4 {
+            bloco[i].rotate_left(i);
+        }
+        
+        bloco
     }
 }
 
