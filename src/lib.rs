@@ -90,8 +90,52 @@ static S_BOX: &'static [[&str; 16]; 16] = &[["63", "7c", "77", "7b", "f2", "6b",
 
 static R_CONSTANTS: [u8; 11] = [0, 1, 2, 4, 8, 16, 32, 64, 128, 27, 54];
 
+static L_TABLE: &'static [[&str; 16]; 16] = &[["00", "00", "19", "01", "32", "02", "1a", "c6", "4b", "c7", "1b", "68", "33", "ee", "df", "03"],
+                                              ["64", "04", "e0", "0e", "34", "8d", "81", "ef", "4c", "71", "08", "c8", "f8", "69", "1c", "c1"],
+                                              ["7d", "c2", "1d", "b5", "f9", "b9", "27", "6a", "4d", "e4", "a6", "72", "9a", "c9", "09", "78"],
+                                              ["65", "2f", "8a", "05", "21", "0f", "e1", "24", "12", "f0", "82", "45", "35", "93", "da", "8e"],
+                                              ["96", "8f", "db", "bd", "36", "d0", "ce", "94", "13", "5c", "d2", "f1", "40", "46", "83", "38"],
+                                              ["66", "dd", "fd", "30", "bf", "06", "8b", "62", "b3", "25", "e2", "98", "22", "88", "91", "10"],
+                                              ["7e", "6e", "48", "c3", "a3", "b6", "1e", "42", "3a", "6b", "28", "54", "fa", "85", "3d", "ba"],
+                                              ["2b", "79", "0a", "15", "9b", "9f", "5e", "ca", "4e", "d4", "ac", "e5", "f3", "73", "a7", "57"],
+                                              ["af", "58", "a8", "50", "f4", "ea", "d6", "74", "4f", "ae", "e9", "d5", "e7", "e6", "ad", "e8"],
+                                              ["2c", "d7", "75", "7a", "eb", "16", "0b", "f5", "59", "cb", "5f", "b0", "9c", "a9", "51", "a0"],
+                                              ["7f", "0c", "f6", "6f", "17", "c4", "49", "ec", "d8", "43", "1f", "2d", "a4", "76", "7b", "b7"],
+                                              ["cc", "bb", "3e", "5a", "fb", "60", "b1", "86", "3b", "52", "a1", "6c", "aa", "55", "29", "9d"],
+                                              ["97", "b2", "87", "90", "61", "be", "dc", "fc", "bc", "95", "cf", "cd", "37", "3f", "5b", "d1"],
+                                              ["53", "39", "84", "3c", "41", "a2", "6d", "47", "14", "2a", "9e", "5d", "56", "f2", "d3", "ab"],
+                                              ["44", "11", "92", "d9", "23", "20", "2e", "89", "b4", "7c", "b8", "26", "77", "99", "e3", "a5"],
+                                              ["67", "4a", "ed", "de", "c5", "31", "fe", "18", "0d", "63", "8c", "80", "c0", "f7", "70", "07"]];
+
+static E_TABLE: &'static [[&str; 16]; 16] = &[["01", "03", "05", "0f", "11", "33", "55", "ff", "1a", "2e", "72", "96", "a1", "f8", "13", "35"],
+                                              ["5f", "e1", "38", "48", "d8", "73", "95", "a4", "f7", "02", "06", "0a", "1e", "22", "66", "aa"],
+                                              ["e5", "34", "5c", "e4", "37", "59", "eb", "26", "6a", "be", "d9", "70", "90", "ab", "e6", "31"],
+                                              ["53", "f5", "04", "0c", "14", "3c", "44", "cc", "4f", "d1", "68", "b8", "d3", "6e", "b2", "cd"],
+                                              ["4c", "d4", "67", "a9", "e0", "3b", "4d", "d7", "62", "a6", "f1", "08", "18", "28", "78", "88"],
+                                              ["83", "9e", "b9", "d0", "6b", "bd", "dc", "7f", "81", "98", "b3", "ce", "49", "db", "76", "9a"],
+                                              ["b5", "c4", "57", "f9", "10", "30", "50", "f0", "0b", "1d", "27", "69", "bb", "d6", "61", "a3"],
+                                              ["fe", "19", "2b", "7d", "87", "92", "ad", "ec", "2f", "71", "93", "ae", "e9", "20", "60", "a0"],
+                                              ["fb", "16", "3a", "4e", "d2", "6d", "b7", "c2", "5d", "e7", "32", "56", "fa", "15", "3f", "41"],
+                                              ["c3", "5e", "e2", "3d", "47", "c9", "40", "c0", "5b", "ed", "2c", "74", "9c", "bf", "da", "75"],
+                                              ["9f", "ba", "d5", "64", "ac", "ef", "2a", "7e", "82", "9d", "bc", "df", "7a", "8e", "89", "80"],
+                                              ["9b", "b6", "c1", "58", "e8", "23", "65", "af", "ea", "25", "6f", "b1", "c8", "43", "c5", "54"],
+                                              ["fc", "1f", "21", "63", "a5", "f4", "07", "09", "1b", "2d", "77", "99", "b0", "cb", "46", "ca"],
+                                              ["45", "cf", "4a", "de", "79", "8b", "86", "91", "a8", "e3", "3e", "42", "c6", "51", "f3", "0e"],
+                                              ["12", "36", "5a", "ee", "29", "7b", "8d", "8c", "8f", "8a", "85", "94", "a7", "f2", "0d", "17"],
+                                              ["39", "4b", "dd", "7c", "84", "97", "a2", "fd", "1c", "24", "6c", "b4", "c7", "52", "f6", "01"]];
+
 pub struct RoundKey {
     chave: [[u8; 4]; 4]
+}
+
+fn get_linha_coluna(byte: u8) -> (usize, usize) {
+    let hex = format!("{:01$x}", byte, 2);
+    let mut chars = hex.chars();
+
+    let linha = usize::from_str_radix(&chars.next().unwrap().to_string(), 16).unwrap();
+    let coluna = usize::from_str_radix(&chars.next().unwrap().to_string(), 16).unwrap();
+
+    (linha, coluna)
 }
 
 impl RoundKey {    
@@ -192,18 +236,18 @@ impl RoundKey {
 
 // -- expansão de chave
 
-pub struct Aes {
-}
+pub struct Aes;
 
 impl Aes {
 
     pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> [[u8; 4]; 4] {
         let matriz_estado = Aes::get_matriz_estado(texto);
-        let depois_xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
-        let sub_bytes = Aes::sub_bytes(depois_xor);
+        let xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
+        let sub_bytes = Aes::sub_bytes(xor);
         let shift_rows = Aes::shift_rows(sub_bytes);
+        let mix_columns = Aes::mix_columns(shift_rows);
 
-        shift_rows
+        mix_columns
     }
 
     fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
@@ -276,6 +320,60 @@ impl Aes {
         }
         
         bloco
+    }
+
+    fn mix_columns(bloco: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
+        let mut matriz_estado = [[0; 4]; 4];
+        let matriz_multiplicacao = [[2, 3, 1, 1],
+                                    [1, 2, 3, 1],
+                                    [1, 1, 2, 3],
+                                    [3, 1, 1, 2]];
+
+        for i in 0..4 {
+            for j in 0..4 {
+                let mut resultado_galois = 0;
+
+                for k in 0..4 {
+                    resultado_galois ^= Aes::multiplicar_galois(bloco[k][i], matriz_multiplicacao[j][k]);
+                }
+
+                matriz_estado[j][i] = resultado_galois;
+            }
+        }
+
+        matriz_estado        
+    }
+
+    fn multiplicar_galois(x: u8, y: u8) -> u8 {
+        if x == 0 || y == 0 {
+            return 0;
+        }
+
+        if x == 1 {
+            return y;
+        }
+
+        if y == 1 {
+            return x;
+        }
+
+        let (linha_x, coluna_x) = get_linha_coluna(x);
+        let (linha_y, coluna_y) = get_linha_coluna(y);
+
+        let valor_x = u8::from_str_radix(L_TABLE[linha_x][coluna_x], 16).unwrap();
+        let valor_y = u8::from_str_radix(L_TABLE[linha_y][coluna_y], 16).unwrap();
+
+        let teste_soma = valor_x as u16 + valor_y as u16;
+
+        let soma = if teste_soma > 255 {
+            (teste_soma - 255) as u8
+        } else {
+            teste_soma as u8
+        };
+
+        let (linha_e, coluna_e) = get_linha_coluna(soma);
+
+        u8::from_str_radix(E_TABLE[linha_e][coluna_e], 16).unwrap()
     }
 }
 
