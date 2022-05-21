@@ -240,8 +240,8 @@ pub struct Aes;
 
 impl Aes {
 
-    pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> Vec<[[u8; 4]; 4]> {
-        let matriz_estado = Aes::get_matriz_estado(texto);
+    pub fn encrypt(bytes: Vec<u8>, key_schedule: Vec<RoundKey>) -> Vec<[[u8; 4]; 4]> {
+        let matriz_estado = Aes::to_pkcs5_blocks(bytes);
         let mut blocos = vec![];
 
         for mut bloco in matriz_estado {
@@ -269,13 +269,7 @@ impl Aes {
 
         blocos
     }
-
-    fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
-        let bytes = texto.as_bytes().to_vec();
-        
-        Aes::to_pkcs5_blocks(bytes)
-    }
-
+    
     fn to_pkcs5_blocks(bytes: Vec<u8>) -> Vec<[[u8; 4]; 4]> {
         let mut blocos = vec![];
         let qtd_ate_16 = 16 - bytes.len() % 16;
