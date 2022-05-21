@@ -15,8 +15,11 @@ fn main() {
 
     let bloco = Aes::encrypt(String::from("DESENVOLVIMENTO!").as_str(), key_schedule);
 
-    for l in bloco {
-        println!("{:?}", l);
+    for b in bloco {
+        for l in b {
+            println!("{:?}", l);
+        }
+        println!();
     }
 }
 

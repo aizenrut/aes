@@ -240,19 +240,34 @@ pub struct Aes;
 
 impl Aes {
 
-    pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> [[u8; 4]; 4] {
+    pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> Vec<[[u8; 4]; 4]> {
         let matriz_estado = Aes::get_matriz_estado(texto);
+        let mut blocos = vec![];
 
-        let chave_atual = &key_schedule[0];
-        let proxima_chave = &key_schedule[1];
+        for mut bloco in matriz_estado {
+            let round_key = &key_schedule[0];
+            bloco = Aes::add_round_key(bloco, round_key);
 
-        let xor = Aes::xor(matriz_estado[0], chave_atual.get_chave());
-        let sub_bytes = Aes::sub_bytes(xor);
-        let shift_rows = Aes::shift_rows(sub_bytes);
-        let mix_columns = Aes::mix_columns(shift_rows);
-        let add_round_key = Aes::add_round_key(mix_columns, proxima_chave);
+            for i in 1..10 {
+                let round_key_atual = &key_schedule[i];
 
-        add_round_key
+                let sub_bytes = Aes::sub_bytes(bloco);
+                let shift_rows = Aes::shift_rows(sub_bytes);
+                let mix_columns = Aes::mix_columns(shift_rows);
+                
+                bloco = Aes::add_round_key(mix_columns, round_key_atual);
+            }
+
+            let ultima_round_key = &key_schedule[10];
+            let sub_bytes = Aes::sub_bytes(bloco);
+            let shift_rows = Aes::shift_rows(sub_bytes);
+            
+            bloco = Aes::add_round_key(shift_rows, ultima_round_key);
+
+            blocos.push(bloco);
+        }
+
+        blocos
     }
 
     fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
