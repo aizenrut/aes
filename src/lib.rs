@@ -242,12 +242,17 @@ impl Aes {
 
     pub fn encrypt(texto: &str, key_schedule: Vec<RoundKey>) -> [[u8; 4]; 4] {
         let matriz_estado = Aes::get_matriz_estado(texto);
-        let xor = Aes::xor(matriz_estado[0], key_schedule[0].get_chave());
+
+        let chave_atual = &key_schedule[0];
+        let proxima_chave = &key_schedule[1];
+
+        let xor = Aes::xor(matriz_estado[0], chave_atual.get_chave());
         let sub_bytes = Aes::sub_bytes(xor);
         let shift_rows = Aes::shift_rows(sub_bytes);
         let mix_columns = Aes::mix_columns(shift_rows);
+        let add_round_key = Aes::add_round_key(mix_columns, proxima_chave);
 
-        mix_columns
+        add_round_key
     }
 
     fn get_matriz_estado(texto: &str) -> Vec<[[u8; 4]; 4]> {
@@ -284,12 +289,12 @@ impl Aes {
         blocos
     }
 
-    fn xor(m1: [[u8; 4]; 4], m2: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
+    fn xor(bloco_x: [[u8; 4]; 4], bloco_y: [[u8; 4]; 4]) -> [[u8; 4]; 4] {
         let mut xor = [[0; 4]; 4]; 
 
         for i in 0..4 {
             for j in 0..4 {
-                xor[i][j] = m1[i][j] ^ m2[i][j];
+                xor[i][j] = bloco_x[i][j] ^ bloco_y[i][j];
             }
         }
 
@@ -374,6 +379,10 @@ impl Aes {
         let (linha_e, coluna_e) = get_linha_coluna(soma);
 
         u8::from_str_radix(E_TABLE[linha_e][coluna_e], 16).unwrap()
+    }
+
+    fn add_round_key(bloco: [[u8; 4]; 4], round_key: &RoundKey) -> [[u8; 4]; 4] {
+        Aes::xor(bloco, round_key.get_chave())
     }
 }
 
