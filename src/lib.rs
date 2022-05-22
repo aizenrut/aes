@@ -50,8 +50,6 @@ impl Config {
     }
 }
 
-// ++ expansão de chave
-
 pub struct ExpansaoDeChave;
 
 impl ExpansaoDeChave {
@@ -233,8 +231,6 @@ impl RoundKey {
         xor
     }
 }
-
-// -- expansão de chave
 
 pub struct Aes;
 
